@@ -78,14 +78,6 @@ tuifyZed z =
 
 handleEvent :: ZeiterfassungsdatenTUI -> BrickEvent Name Tick -> EventM Name (Next ZeiterfassungsdatenTUI)
 handleEvent z (AppEvent Tick)                       = continue z
--- handleEvent g (VtyEvent (V.EvKey V.KUp []))         = continue $ turn North g
--- handleEvent g (VtyEvent (V.EvKey V.KDown []))       = continue $ turn South g
--- handleEvent g (VtyEvent (V.EvKey V.KRight []))      = continue $ turn East g
--- handleEvent g (VtyEvent (V.EvKey V.KLeft []))       = continue $ turn West g
--- handleEvent g (VtyEvent (V.EvKey (V.KChar 'k') [])) = continue $ turn North g
--- handleEvent g (VtyEvent (V.EvKey (V.KChar 'j') [])) = continue $ turn South g
--- handleEvent g (VtyEvent (V.EvKey (V.KChar 'l') [])) = continue $ turn East g
--- handleEvent g (VtyEvent (V.EvKey (V.KChar 'h') [])) = continue $ turn West g
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO initZedTui >>= continue
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt z
 handleEvent z (VtyEvent (V.EvKey V.KEsc []))        = halt z
