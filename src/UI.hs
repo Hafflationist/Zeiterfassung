@@ -59,7 +59,7 @@ main = do
 
 initZedTui :: IO ZeiterfassungsdatenTUI
 initZedTui = do
-  z <- initGame
+  z <- initZed
   return . tuifyZed $ z
 
 

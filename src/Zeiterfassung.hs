@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Zeiterfassung
-  ( initGame
+  ( initZed
   , Zeiterfassungsdaten(..)
   , RawData
   ) where
@@ -51,8 +51,8 @@ parseFile path = do
   return $ Maybe.catMaybes $ parseLine <$> contentLines
 
 
-initGame :: IO Zeiterfassungsdaten
-initGame = do
+initZed :: IO Zeiterfassungsdaten
+initZed = do
   currentRawData <- parseFile constPath
   print currentRawData
   return Zeiterfassungsdaten
