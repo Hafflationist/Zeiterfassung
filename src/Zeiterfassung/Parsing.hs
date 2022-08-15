@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Zeiterfassung
+module Zeiterfassung.Parsing
   ( initZed
   , Zeiterfassungsdaten(..)
   , RawData
@@ -11,19 +11,7 @@ import Data.Attoparsec.Time
 import Data.DateTime
 import qualified Data.Text as Txt
 import qualified Data.Maybe as Maybe
-
--- Types
-
-data Zeiterfassungsdaten = Zeiterfassungsdaten
-  { rawData           :: RawData
-  , workedHours       :: Double
-  , hoursPerIntervall :: IntervallData
-  , hasActiveLog      :: Bool
-  } deriving (Show, Eq)
-
-type RawData = [(DateTime, DateTime)]
-
-type IntervallData = [(String, Int)]
+import Zeiterfassung.Data
 
 
 constPath :: FilePath

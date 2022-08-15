@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c2a474393d697f5087222280cdbcbd68921eef8c708982b9bd392ac055a64c8
+-- hash: 87dce66204886c4132bf3be66700ec2c76add784a9c84813d834b9f352c47302
 
 name:           Zeiterfassung
 version:        0.1.0.0
@@ -29,7 +29,8 @@ library
   exposed-modules:
       Lib
       UI
-      Zeiterfassung
+      Zeiterfassung.Data
+      Zeiterfassung.Parsing
   other-modules:
       Paths_Zeiterfassung
   hs-source-dirs:

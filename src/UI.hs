@@ -22,7 +22,7 @@ import Data.DateTime
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 
-import Zeiterfassung
+import Zeiterfassung.Parsing
 import qualified Graphics.Vty as V
 -- Types
 
