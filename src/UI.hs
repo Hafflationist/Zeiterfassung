@@ -82,9 +82,9 @@ handleEvent z (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO initZedTui >>= cont
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt z
 handleEvent z (VtyEvent (V.EvKey V.KEsc []))        = halt z
 handleEvent z (VtyEvent e) = do
-  hugo <- L.handleListEvent e (rawDataGenericList z)
+  newRawDataGenericList <- L.handleListEvent e (rawDataGenericList z)
   continue (z {
-    rawDataGenericList = hugo
+    rawDataGenericList = newRawDataGenericList
   })
 handleEvent z _                                     = continue z
 
