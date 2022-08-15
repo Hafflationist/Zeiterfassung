@@ -93,8 +93,8 @@ handleEvent z _                                     = continue z
 
 drawUI :: ZeiterfassungsdatenTUI -> [Widget Name]
 drawUI g =
-  [ (Core.hLimit 41 . B.border . drawTimes $ g)  -- 37 Breite ist das absolute Minimum
-    <+> (B.border . drawGrid $ g) 
+  [ (Core.hLimit 41 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ g)  -- 37 Breite ist das absolute Minimum
+    <+> (B.borderWithLabel (str "Aggregierte Zahlen") . drawGrid $ g) 
     <+> B.border emptyWidget
   ]
 
