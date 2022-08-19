@@ -42,7 +42,7 @@ parseFile path = do
 
 
 diffMachine :: [(DateTime, DateTime)] -> RawData
-diffMachine = fmap (\ (from, to) -> (from, to, Clock.diffUTCTime from to))
+diffMachine = fmap (\ (from, to) -> (from, to, DTD . Clock.diffUTCTime to $ from))
 
 
 initZed :: IO Zeiterfassungsdaten

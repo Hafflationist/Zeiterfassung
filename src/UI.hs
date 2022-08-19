@@ -21,8 +21,9 @@ import Control.Concurrent (threadDelay, forkIO)
 import Data.DateTime
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
-import Data.Time (NominalDiffTime)
+import Data.Time
 
+import Zeiterfassung.Data
 import Zeiterfassung.Parsing
 import qualified Graphics.Vty as V
 -- Types
@@ -33,7 +34,7 @@ type Name = ()
 
 data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
-  , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime, NominalDiffTime)
+  , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime, DateTimeDiff)
   } deriving (Show)
 
 -- App definition
@@ -94,7 +95,7 @@ handleEvent z _                                     = continue z
 
 drawUI :: ZeiterfassungsdatenTUI -> [Widget Name]
 drawUI g =
-  [ (Core.hLimit 41 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ g)  -- 37 Breite ist das absolute Minimum
+  [ (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ g)
     <+> (B.borderWithLabel (str "Aggregierte Zahlen") . drawGrid $ g) 
     <+> B.border emptyWidget
   ]
@@ -109,11 +110,13 @@ drawTimes z =
   in widgetList
 
 
-drawSingleTimePair :: Bool -> (DateTime, DateTime, NominalDiffTime) -> Widget Name
+drawSingleTimePair :: Bool -> (DateTime, DateTime, DateTimeDiff) -> Widget Name
 drawSingleTimePair isSelected (von, bis, diff) = 
   let
     prepareString = take 16 . show
-    timeSpanString = prepareString von ++ " - " ++ prepareString bis
+    diffString = show diff
+    diffStringPadded = replicate (6 - length diffString) ' ' ++ diffString
+    timeSpanString = prepareString von ++ " - " ++ prepareString bis ++ "  │ " ++ diffStringPadded
     modificator = if isSelected then withAttr selectedDatePairAttr else id
   in Center.hCenter . modificator . str $ timeSpanString
 
