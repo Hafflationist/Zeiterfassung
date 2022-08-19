@@ -5,10 +5,11 @@ module Zeiterfassung.Data
   ) where
 
 import Data.DateTime
-
+import Data.Time.Clock
 
 data Zeiterfassungsdaten = Zeiterfassungsdaten
   { rawData           :: RawData
+  , rawDiffs          :: [NominalDiffTime]
   , workedHours       :: Double
   , hoursPerIntervall :: IntervallData
   , hasActiveLog      :: Bool

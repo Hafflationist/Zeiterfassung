@@ -9,9 +9,11 @@ module Zeiterfassung.Parsing
 import Data.Attoparsec.Text
 import Data.Attoparsec.Time
 import Data.DateTime
+import qualified Data.Time.Clock as Clock
 import qualified Data.Text as Txt
 import qualified Data.Maybe as Maybe
 import Zeiterfassung.Data
+import Data.Time (NominalDiffTime)
 
 
 constPath :: FilePath
@@ -39,12 +41,17 @@ parseFile path = do
   return $ Maybe.catMaybes $ parseLine <$> contentLines
 
 
+diffMachine :: RawData -> [NominalDiffTime]
+diffMachine rd = uncurry Clock.diffUTCTime <$> rd
+
+
 initZed :: IO Zeiterfassungsdaten
 initZed = do
   currentRawData <- parseFile constPath
-  print currentRawData
+  let diffs = diffMachine currentRawData
   return Zeiterfassungsdaten
     { rawData = currentRawData
+    , rawDiffs = diffs
     , workedHours = 0.0
     , hoursPerIntervall = []
     , hasActiveLog = False
