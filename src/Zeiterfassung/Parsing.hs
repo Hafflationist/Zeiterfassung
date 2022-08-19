@@ -35,23 +35,22 @@ parseLine :: String -> Maybe (DateTime, DateTime)
 parseLine = parseWords . words
 
 
-parseFile :: FilePath -> IO RawData
+parseFile :: FilePath -> IO [(DateTime, DateTime)]
 parseFile path = do
   contentLines <- reverse . lines <$> readFile path
   return $ Maybe.catMaybes $ parseLine <$> contentLines
 
 
-diffMachine :: RawData -> [NominalDiffTime]
-diffMachine rd = uncurry Clock.diffUTCTime <$> rd
+diffMachine :: [(DateTime, DateTime)] -> RawData
+diffMachine = fmap (\ (from, to) -> (from, to, Clock.diffUTCTime from to))
 
 
 initZed :: IO Zeiterfassungsdaten
 initZed = do
-  currentRawData <- parseFile constPath
-  let diffs = diffMachine currentRawData
+  preRd <- parseFile constPath
+  let rd = diffMachine preRd
   return Zeiterfassungsdaten
-    { rawData = currentRawData
-    , rawDiffs = diffs
+    { rawData = rd
     , workedHours = 0.0
     , hoursPerIntervall = []
     , hasActiveLog = False

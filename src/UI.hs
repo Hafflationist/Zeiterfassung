@@ -21,6 +21,7 @@ import Control.Concurrent (threadDelay, forkIO)
 import Data.DateTime
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
+import Data.Time (NominalDiffTime)
 
 import Zeiterfassung.Parsing
 import qualified Graphics.Vty as V
@@ -32,7 +33,7 @@ type Name = ()
 
 data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
-  , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime)
+  , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime, NominalDiffTime)
   } deriving (Show)
 
 -- App definition
@@ -65,7 +66,7 @@ initZedTui = do
 
 tuifyZed :: Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
 tuifyZed z = 
-  let 
+  let
     currentRawData = Seq.fromList . rawData $ z
     genericList = L.list () currentRawData 1
   in ZeiterfassungsdatenTUI {
@@ -108,8 +109,8 @@ drawTimes z =
   in widgetList
 
 
-drawSingleTimePair :: Bool -> (DateTime, DateTime) -> Widget Name
-drawSingleTimePair isSelected (von, bis) = 
+drawSingleTimePair :: Bool -> (DateTime, DateTime, NominalDiffTime) -> Widget Name
+drawSingleTimePair isSelected (von, bis, diff) = 
   let
     prepareString = take 16 . show
     timeSpanString = prepareString von ++ " - " ++ prepareString bis
