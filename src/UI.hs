@@ -31,7 +31,7 @@ import qualified Graphics.Vty as V
 
 data Tick = Tick
 
-type Name = ()
+type Name = Int
 
 data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
@@ -72,7 +72,7 @@ tuifyZed :: DateTime -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
 tuifyZed now z =
   let
     currentRawData = Seq.fromList . rawData $ z
-    genericList = L.list () currentRawData 1
+    genericList = L.list 1 currentRawData 1
   in ZeiterfassungsdatenTUI {
     zed = z,
     rawDataGenericList = genericList,
@@ -101,7 +101,8 @@ drawUI :: ZeiterfassungsdatenTUI -> [Widget Name]
 drawUI z =
   [
     (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ z)
-    <+> (B.borderWithLabel (str "Aggregierte Zahlen") . drawAggregatedDetails $ z)
+    <+> Core.hLimit 50 ((B.borderWithLabel (str "Aggregierte Zahlen") . drawAggregatedDetails $ z) 
+        <=> (B.borderWithLabel (str "Wochenzeiten") . drawWochenzeiten $ z))
     <+> (padTopBottom 1 . padLeftRight 4 . drawSystem $ z)
   ]
 
@@ -134,6 +135,25 @@ drawAggregatedDetails z =
     dataFields = ((str . show . length . rawData . zed $ z) <=> workedHours)
     texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
   in pad texts <+> pad dataFields
+
+
+drawWochenzeiten :: ZeiterfassungsdatenTUI -> Widget Name
+drawWochenzeiten z =
+  let
+    hoursPerWeek = Seq.fromList . Aggregations.weeklyHours . zed $ z
+    genericList = L.list 2 hoursPerWeek 1
+    widgetList :: Widget Name
+    widgetList = L.renderList drawSingleWeek True genericList
+  in widgetList
+
+
+drawSingleWeek :: Bool -> (Int, DateTimeDiff) -> Widget Name
+drawSingleWeek _ (weekNumber, diff) =
+  let
+    diffString = show diff
+    diffStringPadded = replicate (6 - length diffString) ' ' ++ diffString
+    timeSpanString = show weekNumber ++ "  │ " ++ diffStringPadded
+  in Center.hCenter . str $ timeSpanString
 
 
 drawSystem :: ZeiterfassungsdatenTUI -> Widget Name

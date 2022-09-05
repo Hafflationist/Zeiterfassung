@@ -24,3 +24,11 @@ newtype DateTimeDiff = DTD NominalDiffTime
 
 instance Show DateTimeDiff where
   show (DTD ndt) = formatTime defaultTimeLocale "%H:%M" . posixSecondsToUTCTime $ ndt
+
+instance Num DateTimeDiff where
+  (+) (DTD ndt1) (DTD ndt2) = DTD (ndt1 + ndt2)
+  (*) (DTD ndt1) (DTD ndt2) = DTD (ndt1 * ndt2)
+  abs (DTD ndt) = DTD (abs ndt)
+  signum (DTD ndt) = DTD (signum ndt)
+  fromInteger n = DTD (fromInteger n)
+  (-) (DTD ndt1) (DTD ndt2) = DTD (ndt1 - ndt2)
