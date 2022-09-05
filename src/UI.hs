@@ -22,12 +22,12 @@ import Control.Concurrent (threadDelay, forkIO)
 import Data.DateTime
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
+import qualified Data.Time as Time
 
 import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
 import qualified Zeiterfassung.Parsing as Parsing
 import qualified Graphics.Vty as V
--- Types
 
 data Tick = Tick
 
@@ -36,6 +36,7 @@ type Name = ()
 data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
   , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime, DateTimeDiff)
+  , lastFetch          :: DateTime
   } deriving (Show)
 
 -- App definition
@@ -63,17 +64,19 @@ main = do
 initZedTui :: IO ZeiterfassungsdatenTUI
 initZedTui = do
   z <- Parsing.initZed
-  return . tuifyZed $ z
+  now <- Time.getCurrentTime
+  return . tuifyZed now $ z
 
 
-tuifyZed :: Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
-tuifyZed z =
+tuifyZed :: DateTime -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
+tuifyZed now z =
   let
     currentRawData = Seq.fromList . rawData $ z
     genericList = L.list () currentRawData 1
   in ZeiterfassungsdatenTUI {
     zed = z,
-    rawDataGenericList = genericList
+    rawDataGenericList = genericList,
+    lastFetch = now
   }
 
 
@@ -96,9 +99,10 @@ handleEvent z _                                     = continue z
 
 drawUI :: ZeiterfassungsdatenTUI -> [Widget Name]
 drawUI z =
-  [ (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ z)
+  [
+    (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ z)
     <+> (B.borderWithLabel (str "Aggregierte Zahlen") . drawAggregatedDetails $ z)
-    <+> B.border emptyWidget
+    <+> (padTopBottom 1 . padLeftRight 4 . drawSystem $ z)
   ]
 
 
@@ -130,6 +134,13 @@ drawAggregatedDetails z =
     hugo = ((str . show . length . rawData . zed $ z) <=> workedHours)
     texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
   in pad texts <+> pad hugo
+
+
+drawSystem :: ZeiterfassungsdatenTUI -> Widget Name
+drawSystem z =
+  let
+    hugo = lastFetch z
+  in str ("Letzte Aktualisierung: " ++ show hugo)
 
 
 myAttrMap :: AttrMap
