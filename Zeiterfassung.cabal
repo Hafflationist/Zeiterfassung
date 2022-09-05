@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 87dce66204886c4132bf3be66700ec2c76add784a9c84813d834b9f352c47302
+-- hash: f562cf38fd0d96279743ead1caaf165887ce370e7f9183eb06b66c349cfea910
 
 name:           Zeiterfassung
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Lib
       UI
+      Zeiterfassung.Aggregations
       Zeiterfassung.Data
       Zeiterfassung.Parsing
   other-modules:

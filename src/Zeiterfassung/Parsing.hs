@@ -13,7 +13,6 @@ import qualified Data.Time.Clock as Clock
 import qualified Data.Text as Txt
 import qualified Data.Maybe as Maybe
 import Zeiterfassung.Data
-import Data.Time (NominalDiffTime)
 
 
 constPath :: FilePath
@@ -51,7 +50,6 @@ initZed = do
   let rd = diffMachine preRd
   return Zeiterfassungsdaten
     { rawData = rd
-    , workedHours = 0.0
     , hoursPerIntervall = []
     , hasActiveLog = False
     }

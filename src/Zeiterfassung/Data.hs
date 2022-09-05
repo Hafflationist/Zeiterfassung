@@ -11,7 +11,6 @@ import Data.Time.Clock.POSIX
 
 data Zeiterfassungsdaten = Zeiterfassungsdaten
   { rawData           :: RawData
-  , workedHours       :: Double
   , hoursPerIntervall :: IntervallData
   , hasActiveLog      :: Bool
   } deriving (Show, Eq)

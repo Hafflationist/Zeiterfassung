@@ -8,7 +8,8 @@ import Brick
   , continue, halt
   , str
   , attrMap, withAttr, emptyWidget, AttrName, on
-  , (<+>)
+  , (<+>), (<=>)
+  , padTopBottom, padLeftRight
   )
 import Brick.BChan (newBChan, writeBChan)
 import qualified Brick.Widgets.Border as B
@@ -21,10 +22,10 @@ import Control.Concurrent (threadDelay, forkIO)
 import Data.DateTime
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
-import Data.Time
 
+import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
-import Zeiterfassung.Parsing
+import qualified Zeiterfassung.Parsing as Parsing
 import qualified Graphics.Vty as V
 -- Types
 
@@ -61,12 +62,12 @@ main = do
 
 initZedTui :: IO ZeiterfassungsdatenTUI
 initZedTui = do
-  z <- initZed
+  z <- Parsing.initZed
   return . tuifyZed $ z
 
 
 tuifyZed :: Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
-tuifyZed z = 
+tuifyZed z =
   let
     currentRawData = Seq.fromList . rawData $ z
     genericList = L.list () currentRawData 1
@@ -94,16 +95,16 @@ handleEvent z _                                     = continue z
 -- Drawing
 
 drawUI :: ZeiterfassungsdatenTUI -> [Widget Name]
-drawUI g =
-  [ (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ g)
-    <+> (B.borderWithLabel (str "Aggregierte Zahlen") . drawGrid $ g) 
+drawUI z =
+  [ (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ z)
+    <+> (B.borderWithLabel (str "Aggregierte Zahlen") . drawAggregatedDetails $ z)
     <+> B.border emptyWidget
   ]
 
 
 drawTimes :: ZeiterfassungsdatenTUI -> Widget Name
 drawTimes z =
-  let 
+  let
     genericList = rawDataGenericList z
     widgetList :: Widget Name
     widgetList = L.renderList drawSingleTimePair True genericList
@@ -111,7 +112,7 @@ drawTimes z =
 
 
 drawSingleTimePair :: Bool -> (DateTime, DateTime, DateTimeDiff) -> Widget Name
-drawSingleTimePair isSelected (von, bis, diff) = 
+drawSingleTimePair isSelected (von, bis, diff) =
   let
     prepareString = take 16 . show
     diffString = show diff
@@ -121,8 +122,14 @@ drawSingleTimePair isSelected (von, bis, diff) =
   in Center.hCenter . modificator . str $ timeSpanString
 
 
-drawGrid :: ZeiterfassungsdatenTUI -> Widget Name
-drawGrid = str . show . length . rawData . zed
+drawAggregatedDetails :: ZeiterfassungsdatenTUI -> Widget Name
+drawAggregatedDetails z =
+  let
+    pad = padTopBottom 1 . padLeftRight 4
+    workedHours = str . show . Aggregations.sumAllHours . zed $ z
+    hugo = ((str . show . length . rawData . zed $ z) <=> workedHours)
+    texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
+  in pad texts <+> pad hugo
 
 
 myAttrMap :: AttrMap
