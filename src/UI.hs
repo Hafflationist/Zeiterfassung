@@ -131,16 +131,16 @@ drawAggregatedDetails z =
   let
     pad = padTopBottom 1 . padLeftRight 4
     workedHours = str . show . Aggregations.sumAllHours . zed $ z
-    hugo = ((str . show . length . rawData . zed $ z) <=> workedHours)
+    dataFields = ((str . show . length . rawData . zed $ z) <=> workedHours)
     texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
-  in pad texts <+> pad hugo
+  in pad texts <+> pad dataFields
 
 
 drawSystem :: ZeiterfassungsdatenTUI -> Widget Name
 drawSystem z =
   let
-    hugo = lastFetch z
-  in str ("Letzte Aktualisierung: " ++ show hugo)
+    lastFetchStr = show . lastFetch $ z
+  in str ("Letzte Aktualisierung: " ++ lastFetchStr)
 
 
 myAttrMap :: AttrMap
