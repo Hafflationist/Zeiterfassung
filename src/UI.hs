@@ -51,10 +51,11 @@ app = App { appDraw = drawUI
 
 main :: IO ()
 main = do
+  let secondsPerTick = 2
   chan <- newBChan 10
   _ <- forkIO $ forever $ do
     writeBChan chan Tick
-    threadDelay 100000 -- decides how fast your Zeiterfassungsdaten moves
+    threadDelay (1000000 * secondsPerTick)
   g <- initZedTui
   let builder = V.mkVty V.defaultConfig
   initialVty <- builder
@@ -65,14 +66,31 @@ initZedTui :: IO ZeiterfassungsdatenTUI
 initZedTui = do
   z <- Parsing.initZed
   now <- Time.getCurrentTime
-  return . tuifyZed now $ z
+  return . tuifyZed now Nothing $ z
 
 
-tuifyZed :: DateTime -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
-tuifyZed now z =
+reloadZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
+reloadZedTui oldZ = do
+  let selectedElement = fmap snd . L.listSelectedElement . rawDataGenericList $ oldZ
+  z <- Parsing.initZed
+  now <- Time.getCurrentTime
+  return . tuifyZed now selectedElement $ z
+
+
+tuifyZed :: DateTime -> Maybe (DateTime, DateTime, DateTimeDiff) -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
+tuifyZed now Nothing z =
   let
     currentRawData = Seq.fromList . rawData $ z
     genericList = L.list 1 currentRawData 1
+  in ZeiterfassungsdatenTUI {
+    zed = z,
+    rawDataGenericList = genericList,
+    lastFetch = now
+  }
+tuifyZed now (Just targetElement) z =
+  let
+    currentRawData = Seq.fromList . rawData $ z
+    genericList = L.listMoveToElement targetElement . L.list 1 currentRawData $ 1
   in ZeiterfassungsdatenTUI {
     zed = z,
     rawDataGenericList = genericList,
@@ -83,8 +101,8 @@ tuifyZed now z =
 -- Handling events
 
 handleEvent :: ZeiterfassungsdatenTUI -> BrickEvent Name Tick -> EventM Name (Next ZeiterfassungsdatenTUI)
-handleEvent z (AppEvent Tick)                       = continue z
-handleEvent z (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO initZedTui >>= continue
+handleEvent z (AppEvent Tick)                       = liftIO (reloadZedTui z) >>= continue
+handleEvent z (VtyEvent (V.EvKey (V.KChar 'r') [])) = liftIO (reloadZedTui z) >>= continue
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt z
 handleEvent z (VtyEvent (V.EvKey V.KEsc []))        = halt z
 handleEvent z (VtyEvent e) = do
