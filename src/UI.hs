@@ -23,10 +23,12 @@ import Data.DateTime
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 import qualified Data.Time as Time
+import Data.Time.LocalTime
 
 import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
 import qualified Zeiterfassung.Parsing as Parsing
+import qualified Zeiterfassung.Zeit as Zeit
 import qualified Graphics.Vty as V
 
 data Tick = Tick
@@ -36,7 +38,7 @@ type Name = Int
 data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
   , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime, DateTimeDiff)
-  , lastFetch          :: DateTime
+  , lastFetch          :: LocalTime
   } deriving (Show)
 
 -- App definition
@@ -62,10 +64,12 @@ main = do
   void $ customMain initialVty builder (Just chan) app g
 
 
+
+
 initZedTui :: IO ZeiterfassungsdatenTUI
 initZedTui = do
   z <- Parsing.initZed
-  now <- Time.getCurrentTime
+  now <- Zeit.getCurrentLocalTime
   return . tuifyZed now Nothing $ z
 
 
@@ -73,11 +77,11 @@ reloadZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
 reloadZedTui oldZ = do
   let selectedElement = fmap snd . L.listSelectedElement . rawDataGenericList $ oldZ
   z <- Parsing.initZed
-  now <- Time.getCurrentTime
+  now <- Zeit.getCurrentLocalTime
   return . tuifyZed now selectedElement $ z
 
 
-tuifyZed :: DateTime -> Maybe (DateTime, DateTime, DateTimeDiff) -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
+tuifyZed :: LocalTime -> Maybe (DateTime, DateTime, DateTimeDiff) -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
 tuifyZed now Nothing z =
   let
     currentRawData = Seq.fromList . rawData $ z
