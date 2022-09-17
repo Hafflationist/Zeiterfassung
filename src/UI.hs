@@ -181,7 +181,7 @@ drawSingleWeek _ (weekNumber, diff) =
 drawSystem :: ZeiterfassungsdatenTUI -> Widget Name
 drawSystem z =
   let
-    lastFetchStr = show . lastFetch $ z
+    lastFetchStr = take 19 . show . lastFetch $ z
   in str ("Letzte Aktualisierung: " ++ lastFetchStr)
 
 
