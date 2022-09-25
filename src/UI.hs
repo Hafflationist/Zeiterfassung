@@ -123,7 +123,7 @@ drawUI :: ZeiterfassungsdatenTUI -> [Widget Name]
 drawUI z =
   [
     (Core.hLimit 51 . B.borderWithLabel (str "Rohdatensätze") . drawTimes $ z)
-    <+> Core.hLimit 50 ((B.borderWithLabel (str "Aggregierte Zahlen") . drawAggregatedDetails $ z) 
+    <+> Core.hLimit 47 ((B.borderWithLabel (str "Aggregierte Zahlen") . drawAggregatedDetails $ z) 
         <=> (B.borderWithLabel (str "Wochenzeiten") . drawWochenzeiten $ z))
     <+> (padTopBottom 1 . padLeftRight 4 . drawSystem $ z)
   ]
@@ -153,8 +153,9 @@ drawAggregatedDetails :: ZeiterfassungsdatenTUI -> Widget Name
 drawAggregatedDetails z =
   let
     pad = padTopBottom 1 . padLeftRight 4
-    workedHours = str . show . Aggregations.sumAllHours . zed $ z
-    dataFields = ((str . show . length . rawData . zed $ z) <=> workedHours)
+    workedHours = str . take 6 . show . Aggregations.sumAllHours . zed $ z
+    workedHoursPerWeek = str . take 4 . show . Aggregations.averageHoursPerWeek . zed $ z
+    dataFields = ((str . show . length . rawData . zed $ z) <=> workedHours <=> workedHoursPerWeek)
     texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
   in pad texts <+> pad dataFields
 

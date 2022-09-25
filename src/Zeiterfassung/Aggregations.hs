@@ -1,5 +1,5 @@
 module Zeiterfassung.Aggregations
-  (sumAllHours, weeklyHours) where
+  (sumAllHours, weeklyHours, averageHoursPerWeek) where
 
 import Data.DateTime (DateTime)
 import qualified Data.List as List ( map, sum, groupBy )
@@ -11,7 +11,7 @@ import Zeiterfassung.Data (Zeiterfassungsdaten (..), DateTimeDiff (..))
 
 
 
-sumAllHours :: Zeiterfassungsdaten -> Float
+sumAllHours :: Zeiterfassungsdaten -> Double
 sumAllHours zed = (List.sum . List.map (\(_,_, DTD d) -> fromInteger . round $ d) . rawData $ zed) / 3600.0
 
 
@@ -37,3 +37,12 @@ weeklyHours zed =
    . List.groupBy grouper 
    . List.map (\ (von, _, diff) -> (getWeek von, diff)) 
    . rawData $ zed
+
+
+averageHoursPerWeek :: Zeiterfassungsdaten ->  Double
+averageHoursPerWeek zed =
+  let
+    hours = sumAllHours zed
+    weeklyHoursList = weeklyHours zed
+    numberOfWeek = Prelude.length weeklyHoursList
+  in hours / fromIntegral numberOfWeek
