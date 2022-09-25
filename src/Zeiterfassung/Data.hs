@@ -21,8 +21,8 @@ type IntervallData = [(String, Int)]
 
 newtype DateTimeDiff = DTD NominalDiffTime
   deriving (Eq)
-
 instance Show DateTimeDiff where
+
   show (DTD ndt) = formatTime defaultTimeLocale "%H:%M" . posixSecondsToUTCTime $ ndt
 
 instance Num DateTimeDiff where
