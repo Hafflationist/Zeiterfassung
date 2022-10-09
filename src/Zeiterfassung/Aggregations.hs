@@ -15,8 +15,9 @@ sumAllHours :: Zeiterfassungsdaten -> Double
 sumAllHours zed = (List.sum . List.map (\(_,_, DTD d) -> fromInteger . round $ d) . rawData $ zed) / 3600.0
 
 
-getWeek :: DateTime -> Int
-getWeek dt =
+getWeek :: Maybe DateTime -> Int
+getWeek Nothing = -2
+getWeek (Just dt) =
   let
     (_, weekOfYear, _) = toWeekDate . utctDay $ dt
   in weekOfYear

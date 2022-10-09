@@ -15,7 +15,7 @@ data Zeiterfassungsdaten = Zeiterfassungsdaten
   , hasActiveLog      :: Bool
   } deriving (Show, Eq)
 
-type RawData = [(DateTime, DateTime, DateTimeDiff)]
+type RawData = [(Maybe DateTime, Maybe DateTime, DateTimeDiff)]
 
 type IntervallData = [(String, Int)]
 

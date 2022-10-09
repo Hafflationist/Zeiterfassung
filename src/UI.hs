@@ -38,7 +38,7 @@ type Name = Int
 
 data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
-  , rawDataGenericList :: L.GenericList Name Seq (DateTime, DateTime, DateTimeDiff)
+  , rawDataGenericList :: L.GenericList Name Seq (Maybe DateTime, Maybe DateTime, DateTimeDiff)
   , lastFetch          :: LocalTime
   } deriving (Show)
 
@@ -83,7 +83,7 @@ reloadZedTui oldZ = do
   return . tuifyZed now selectedElement $ z
 
 
-tuifyZed :: LocalTime -> Maybe (DateTime, DateTime, DateTimeDiff) -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
+tuifyZed :: LocalTime -> Maybe (Maybe DateTime, Maybe DateTime, DateTimeDiff) -> Zeiterfassungsdaten -> ZeiterfassungsdatenTUI
 tuifyZed now Nothing z =
   let
     currentRawData = Seq.fromList . rawData $ z
@@ -140,10 +140,11 @@ drawTimes z =
   in widgetList
 
 
-drawSingleTimePair :: Bool -> (DateTime, DateTime, DateTimeDiff) -> Widget Name
+drawSingleTimePair :: Bool -> (Maybe DateTime, Maybe DateTime, DateTimeDiff) -> Widget Name
 drawSingleTimePair isSelected (von, bis, diff) =
   let
-    prepareString = take 16 . show
+    prepareString Nothing = "       ??       "
+    prepareString (Just dtm) = take 16 . show $ dtm
     diffString = show diff
     diffStringPadded = replicate (6 - length diffString) ' ' ++ diffString
     timeSpanString = prepareString von ++ " - " ++ prepareString bis ++ "  │ " ++ diffStringPadded

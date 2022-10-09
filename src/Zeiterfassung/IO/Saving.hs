@@ -12,8 +12,9 @@ constPath :: FilePath
 constPath = "/Schnitt/Uni/MA/talog.txt"
 
 
-dateTimeToString :: DateTime -> String 
-dateTimeToString dtm =
+dateTimeToString :: Maybe DateTime -> String 
+dateTimeToString Nothing = "nothing"
+dateTimeToString (Just dtm) =
   let
     repl ' ' = 'T'
     repl x = x  
@@ -23,7 +24,7 @@ dateTimeToString dtm =
    $ dtm
 
 
-spanToString :: DateTime -> DateTime -> String
+spanToString :: Maybe DateTime -> Maybe DateTime -> String
 spanToString von bis =
   let
     vonStr = dateTimeToString von
@@ -31,7 +32,7 @@ spanToString von bis =
   in vonStr ++ " - " ++ bisStr
 
 
-rawDataToString :: [(DateTime, DateTime)] -> String
+rawDataToString :: [(Maybe DateTime, Maybe DateTime)] -> String
 rawDataToString rd = List.intercalate "\n" (fmap (uncurry spanToString) rd)
 
 
