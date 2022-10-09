@@ -27,7 +27,8 @@ import Data.Time.LocalTime
 
 import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
-import qualified Zeiterfassung.Parsing as Parsing
+import qualified Zeiterfassung.IO.Saving as Saving
+import qualified Zeiterfassung.IO.Parsing as Parsing
 import qualified Zeiterfassung.Zeit as Zeit
 import qualified Graphics.Vty as V
 
@@ -76,6 +77,7 @@ initZedTui = do
 reloadZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
 reloadZedTui oldZ = do
   let selectedElement = fmap snd . L.listSelectedElement . rawDataGenericList $ oldZ
+  Saving.writeZed . zed $ oldZ
   z <- Parsing.initZed
   now <- Zeit.getCurrentLocalTime
   return . tuifyZed now selectedElement $ z

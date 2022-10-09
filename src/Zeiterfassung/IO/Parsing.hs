@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Zeiterfassung.Parsing
+module Zeiterfassung.IO.Parsing
   ( initZed
   , Zeiterfassungsdaten(..)
   , RawData
