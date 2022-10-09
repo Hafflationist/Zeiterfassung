@@ -2,7 +2,7 @@ module Zeiterfassung.Aggregations
   (sumAllHours, weeklyHours, averageHoursPerWeek) where
 
 import Data.DateTime (DateTime)
-import qualified Data.List as List ( map, sum, groupBy )
+import qualified Data.List as List ( map, sum, groupBy, filter )
 import qualified Data.Maybe as Maybe
 import Data.Time (UTCTime(utctDay))
 import Data.Time.Calendar.WeekDate
@@ -43,7 +43,8 @@ weeklyHours zed =
 averageHoursPerWeek :: Zeiterfassungsdaten ->  Double
 averageHoursPerWeek zed =
   let
-    hours = sumAllHours zed
-    weeklyHoursList = weeklyHours zed
+    weeklyHoursList = List.filter (\ (num, _) -> num >= 0) . weeklyHours $ zed
     numberOfWeek = Prelude.length weeklyHoursList
+    DTD ndt = List.sum (snd <$> weeklyHoursList)
+    hours = (fromInteger . round $ ndt) / 3600.0
   in hours / fromIntegral numberOfWeek

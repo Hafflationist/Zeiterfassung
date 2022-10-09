@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e4cdfc1ed6d5969716c5002f397215d534c007eda510461c176d08d26a4fe487
+-- hash: cd29b490695c7787661d3f4696b542c9fc0f8a4939d208092a737e83b1c8135f
 
 name:           Zeiterfassung
 version:        0.1.0.0
@@ -28,7 +28,9 @@ source-repository head
 library
   exposed-modules:
       Lib
-      UI
+      UI.Draw
+      UI.State
+      UI.StateEvolver
       Zeiterfassung.Aggregations
       Zeiterfassung.Data
       Zeiterfassung.IO.Parsing
@@ -53,6 +55,7 @@ library
     , linear
     , random
     , text
+    , text-zipper
     , time
     , transformers
     , vty
@@ -80,6 +83,7 @@ executable Zeiterfassung-exe
     , linear
     , random
     , text
+    , text-zipper
     , time
     , transformers
     , vty
