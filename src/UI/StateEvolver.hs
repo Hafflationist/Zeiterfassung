@@ -33,7 +33,7 @@ import qualified Zeiterfassung.IO.Saving as Saving
 import qualified Zeiterfassung.IO.Parsing as Parsing
 import qualified Zeiterfassung.Zeit as Zeit
 import qualified Graphics.Vty as V
-import qualified Data.IntMap.Strict as Zipper
+import qualified Zeiterfassung.Aggregations as Aggregations
 
 -- App definition
 
@@ -71,17 +71,30 @@ initZedTui = do
 
 reloadZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
 reloadZedTui oldZ = do
-  let firstElement = List.head . rawData . zed $ oldZ
+  now <- Zeit.getCurrentLocalTime
+  let firstElement = List.head . rawDataWithDiff . zed $ oldZ
   let selectedElement = Maybe.maybe firstElement snd . L.listSelectedElement . rawDataGenericList $ oldZ
   z <- Parsing.initZed
-  let currentRawData = Seq.fromList . rawData $ z
-  let genericList = L.listMoveToElement selectedElement. L.list 1 currentRawData $ 1
+  let currentRawData = Seq.fromList . rawDataWithDiff $ z 
+  let genericList = L.listMoveToElement selectedElement . L.list 1 currentRawData $ 1
   Saving.writeZed . zed $ oldZ
-  now <- Zeit.getCurrentLocalTime
   return . reloadEditors $ (oldZ {
     zed = z,
     rawDataGenericList = genericList,
     lastFetch = now
+  })
+
+
+refreshZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
+refreshZedTui z = do
+  now <- Zeit.getCurrentLocalTime
+  let newZed = Aggregations.diffMachine now . zed $ z
+  let selectedElementIdx = Maybe.fromMaybe 0 . L.listSelected . rawDataGenericList $ z
+  let currentRawData = Seq.fromList . rawDataWithDiff $ newZed 
+  let genericList = L.listMoveTo selectedElementIdx . L.list 1 currentRawData $ 1
+  return (z {
+    zed = newZed,
+    rawDataGenericList = genericList
   })
 
 
@@ -97,9 +110,14 @@ reloadEditors z =
     getRightEditors (Just (_, (Nothing, Just bis, _))) = getRightEditorsInner "??" (show bis)
     getRightEditors (Just (_, (Just von, Nothing, _))) = getRightEditorsInner (show von) "??"
     getRightEditors _ = getRightEditorsInner "??" "??"
-    getRightEditorsInner von bis = (Edit.editorText 3 (Just 1) (pack von), Edit.editorText 4 (Just 1) (pack bis))
+    getRightEditorsInner von bis = (
+        moveCursorToEnd . Edit.editorText 3 (Just 1) $ pack . Prelude.take 16 $ von, 
+        moveCursorToEnd . Edit.editorText 4 (Just 1) $ pack . Prelude.take 16 $ bis
+      )
     
 
+moveCursorToEnd :: Edit.Editor Text Name -> Edit.Editor Text Name
+moveCursorToEnd = Edit.applyEdit Zipper.gotoEOF
 
 
 setFocus :: Focus -> ZeiterfassungsdatenTUI -> ZeiterfassungsdatenTUI
@@ -112,13 +130,13 @@ setFocus newFocus zTui =
 tuifyZed :: LocalTime -> Zeiterfassungsdaten -> Focus -> ZeiterfassungsdatenTUI
 tuifyZed now z foc =
   let
-    currentRawData = Seq.fromList . rawData $ z
+    currentRawData = Seq.fromList . rawDataWithDiff $ z
     genericList = L.list 1 currentRawData 1
   in ZeiterfassungsdatenTUI {
     zed = z,
     rawDataGenericList = genericList,
-    editorVon = Edit.editorText 3 (Just 1) "Von",
-    editorBis = Edit.editorText 4 (Just 1) "Bis",
+    editorVon = moveCursorToEnd . Edit.editorText 3 (Just 1) $ "Von",
+    editorBis = moveCursorToEnd . Edit.editorText 4 (Just 1) $ "Bis",
     lastFetch = now,
     focus = foc
   }
@@ -151,7 +169,7 @@ handleEditorBis event z = do
 -- Handling events
 
 handleEvent :: ZeiterfassungsdatenTUI -> BrickEvent Name Tick -> EventM Name (Next ZeiterfassungsdatenTUI)
-handleEvent z (AppEvent Tick)                        = liftIO (reloadZedTui z) >>= continue
+handleEvent z (AppEvent Tick)                        = liftIO (refreshZedTui z) >>= continue
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'r') []))  = liftIO (reloadZedTui z) >>= continue
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'v') []))  = continue . setFocus FocusVon $ z
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'b') []))  = continue . setFocus FocusBis $ z

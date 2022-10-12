@@ -1,6 +1,7 @@
 module Zeiterfassung.Data
   ( Zeiterfassungsdaten(..)
   , RawData
+  , RawDataWithDiff
   , IntervallData
   , DateTimeDiff(..)
   ) where
@@ -11,11 +12,14 @@ import Data.Time.Clock.POSIX
 
 data Zeiterfassungsdaten = Zeiterfassungsdaten
   { rawData           :: RawData
+  , rawDataWithDiff   :: RawDataWithDiff
   , hoursPerIntervall :: IntervallData
   , hasActiveLog      :: Bool
   } deriving (Show, Eq)
 
-type RawData = [(Maybe DateTime, Maybe DateTime, DateTimeDiff)]
+type RawData = [(Maybe DateTime, Maybe DateTime)]
+
+type RawDataWithDiff = [(Maybe DateTime, Maybe DateTime, DateTimeDiff)]
 
 type IntervallData = [(String, Int)]
 

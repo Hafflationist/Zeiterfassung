@@ -10,10 +10,8 @@ import Data.Attoparsec.Text
 import Data.Attoparsec.Time
 import Data.DateTime
 import qualified Data.Either.Extra as EitherExtra
-import qualified Data.Time.Clock as Clock
-import Data.Time.LocalTime
-import qualified Data.Time.LocalTime as LocalTime
 import qualified Data.Text as Txt
+import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
 import qualified Zeiterfassung.Zeit as Zeit
 
@@ -41,26 +39,15 @@ parseFile path = do
   return $ parseLine <$> contentLines
 
 
-diff :: DateTime -> Maybe DateTime -> Maybe DateTime -> DateTimeDiff
-diff _ (Just from) (Just to) = DTD . Clock.diffUTCTime to $ from
-diff now (Just from) Nothing = DTD . Clock.diffUTCTime now $ from
-diff now _ _ = DTD . Clock.diffUTCTime now $ now
-
-
-diffMachine :: LocalTime -> [(Maybe DateTime, Maybe DateTime)] -> RawData
-diffMachine now rawRawData = 
-  let 
-    localDtm = LocalTime.localTimeToUTC LocalTime.utc now
-  in fmap (\ (from, to) -> (from, to, diff localDtm from to)) rawRawData
 
 
 initZed :: IO Zeiterfassungsdaten
 initZed = do
-  now <- Zeit.getCurrentLocalTime
-  preRd <- parseFile constPath
-  let rd = diffMachine now preRd
-  return Zeiterfassungsdaten
+  rd <- parseFile constPath
+  now <- Zeit.getCurrentLocalTime 
+  return . Aggregations.diffMachine now $ Zeiterfassungsdaten
     { rawData = rd
+    , rawDataWithDiff = []
     , hoursPerIntervall = []
     , hasActiveLog = False
     }

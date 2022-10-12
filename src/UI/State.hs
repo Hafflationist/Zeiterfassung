@@ -19,7 +19,7 @@ data ZeiterfassungsdatenTUI = ZeiterfassungsdatenTUI
   { zed                :: Zeiterfassungsdaten
   , rawDataGenericList :: L.GenericList Name Seq (Maybe DateTime, Maybe DateTime, DateTimeDiff)
   , editorVon          :: Edit.Editor Text Name
-  , editorBis          :: Edit.Editor Text Name
   , lastFetch          :: LocalTime
   , focus              :: Focus 
+  , editorBis          :: Edit.Editor Text Name
   } deriving (Show)

@@ -38,5 +38,5 @@ rawDataToString rd = List.intercalate "\n" (fmap (uncurry spanToString) rd)
 
 writeZed :: Zeiterfassungsdaten -> IO ()
 writeZed zed = do
-  let rawDataStr = rawDataToString . fmap (\ (von, bis, _) -> (von, bis)) . rawData $ zed
+  let rawDataStr = rawDataToString . rawData $ zed
   writeFile constPath rawDataStr

@@ -36,6 +36,7 @@ drawUI z =
           <=> (B.borderWithLabel (str "Wochenzeiten") . drawWochenzeiten $ z))
       <+> (B.borderWithLabel (str "Datensatz") . drawDatensatz $ z)
     )
+    <=> padLeftRight 2 drawHelp
     <=> (padLeftRight 2 . drawSystem $ z)
   ]
 
@@ -65,8 +66,8 @@ drawAggregatedDetails :: ZeiterfassungsdatenTUI -> Widget Name
 drawAggregatedDetails z =
   let
     pad = padTopBottom 1 . padLeftRight 4
-    workedHours = str . Prelude.take 6 . show . Aggregations.sumAllHours . zed $ z
-    workedHoursPerWeek = str . Prelude.take 4 . show . Aggregations.averageHoursPerWeek . zed $ z
+    workedHours = str . Prelude.take 6 . show . Aggregations.sumAllHours . rawDataWithDiff . zed $ z
+    workedHoursPerWeek = str . Prelude.take 4 . show . Aggregations.averageHoursPerWeek . rawDataWithDiff . zed $ z
     dataFields = ((str . show . Prelude.length . rawData . zed $ z) <=> workedHours <=> workedHoursPerWeek)
     texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
   in pad texts <+> pad dataFields
@@ -75,7 +76,7 @@ drawAggregatedDetails z =
 drawWochenzeiten :: ZeiterfassungsdatenTUI -> Widget Name
 drawWochenzeiten z =
   let
-    hoursPerWeek = Seq.fromList . Aggregations.weeklyHours . zed $ z
+    hoursPerWeek = Seq.fromList . Aggregations.weeklyHours . rawDataWithDiff . zed $ z
     genericList = L.list 2 hoursPerWeek 1
     widgetList :: Widget Name
     widgetList = L.renderList drawSingleWeek True genericList
@@ -107,6 +108,10 @@ drawDatensatz z =
     editorWidgetBis = drawSingleDateTime (editorBis z) (focus z == FocusBis)
     textBis = if focus z == FocusBis then " [Bis:]" else "  Bis: "
  in (str textVon <+> editorWidgetVon) <=> (str textBis <+> editorWidgetBis)
+
+
+drawHelp :: Widget Name
+drawHelp = str "V=Fokus auf von; B=Fokus auf bis; Esc=Fokus auf Liste; R=Neuladen; Q=Beenden"
 
 
 drawSystem :: ZeiterfassungsdatenTUI -> Widget Name
