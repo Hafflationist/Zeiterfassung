@@ -69,22 +69,6 @@ initZedTui = do
   return . tuifyZed now z $ FocusListe
 
 
-reloadZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
-reloadZedTui oldZ = do
-  now <- Zeit.getCurrentLocalTime
-  let firstElement = List.head . rawDataWithDiff . zed $ oldZ
-  let selectedElement = Maybe.maybe firstElement snd . L.listSelectedElement . rawDataGenericList $ oldZ
-  z <- Parsing.initZed
-  let currentRawData = Seq.fromList . rawDataWithDiff $ z 
-  let genericList = L.listMoveToElement selectedElement . L.list 1 currentRawData $ 1
-  Saving.writeZed . zed $ oldZ
-  return . reloadEditors $ (oldZ {
-    zed = z,
-    rawDataGenericList = genericList,
-    lastFetch = now
-  })
-
-
 refreshZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
 refreshZedTui z = do
   now <- Zeit.getCurrentLocalTime
@@ -96,6 +80,27 @@ refreshZedTui z = do
     zed = newZed,
     rawDataGenericList = genericList
   })
+
+
+reloadZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
+reloadZedTui oldZ = do
+  now <- Zeit.getCurrentLocalTime
+  let firstElement = List.head . rawDataWithDiff . zed $ oldZ
+  let selectedElement = Maybe.maybe firstElement snd . L.listSelectedElement . rawDataGenericList $ oldZ
+  z <- Parsing.initZed
+  let currentRawData = Seq.fromList . rawDataWithDiff $ z 
+  let genericList = L.listMoveToElement selectedElement . L.list 1 currentRawData $ 1
+  return . reloadEditors $ (oldZ {
+    zed = z,
+    rawDataGenericList = genericList,
+    lastFetch = now
+  })
+
+
+saveZedTui :: ZeiterfassungsdatenTUI -> IO ZeiterfassungsdatenTUI
+saveZedTui z = do
+  Saving.writeZed . zed $ z
+  return z
 
 
 reloadEditors :: ZeiterfassungsdatenTUI -> ZeiterfassungsdatenTUI
@@ -171,6 +176,7 @@ handleEditorBis event z = do
 handleEvent :: ZeiterfassungsdatenTUI -> BrickEvent Name Tick -> EventM Name (Next ZeiterfassungsdatenTUI)
 handleEvent z (AppEvent Tick)                        = liftIO (refreshZedTui z) >>= continue
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'r') []))  = liftIO (reloadZedTui z) >>= continue
+handleEvent z (VtyEvent (V.EvKey (V.KChar 's') []))  = liftIO (saveZedTui z) >>= continue
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'v') []))  = continue . setFocus FocusVon $ z
 handleEvent z (VtyEvent (V.EvKey (V.KChar 'b') []))  = continue . setFocus FocusBis $ z
 handleEvent z (VtyEvent (V.EvKey V.KEsc []))         = continue . setFocus FocusListe $ z

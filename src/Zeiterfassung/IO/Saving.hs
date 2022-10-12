@@ -33,7 +33,7 @@ spanToString von bis =
 
 
 rawDataToString :: [(Maybe DateTime, Maybe DateTime)] -> String
-rawDataToString rd = List.intercalate "\n" (fmap (uncurry spanToString) rd)
+rawDataToString rd = List.intercalate "\n" . reverse $ fmap (uncurry spanToString) rd
 
 
 writeZed :: Zeiterfassungsdaten -> IO ()

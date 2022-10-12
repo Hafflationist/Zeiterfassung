@@ -111,7 +111,7 @@ drawDatensatz z =
 
 
 drawHelp :: Widget Name
-drawHelp = str "V=Fokus auf von; B=Fokus auf bis; Esc=Fokus auf Liste; R=Neuladen; Q=Beenden"
+drawHelp = str "V=Fokus auf von; B=Fokus auf bis; Esc=Fokus auf Liste; R=Neuladen; S=Speicher; Q=Beenden"
 
 
 drawSystem :: ZeiterfassungsdatenTUI -> Widget Name
