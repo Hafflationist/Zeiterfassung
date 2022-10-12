@@ -6,10 +6,7 @@ module Zeiterfassung.IO.Saving
 import qualified Data.List as List
 import Data.DateTime
 import Zeiterfassung.Data
-
-
-constPath :: FilePath
-constPath = "/Schnitt/Uni/MA/talog.txt"
+import qualified Zeiterfassung.IO.Common as Common
 
 
 dateTimeToString :: Maybe DateTime -> String 
@@ -39,4 +36,4 @@ rawDataToString rd = List.intercalate "\n" . reverse $ fmap (uncurry spanToStrin
 writeZed :: Zeiterfassungsdaten -> IO ()
 writeZed zed = do
   let rawDataStr = rawDataToString . rawData $ zed
-  writeFile constPath rawDataStr
+  writeFile (Common.constPath ++ "-") rawDataStr

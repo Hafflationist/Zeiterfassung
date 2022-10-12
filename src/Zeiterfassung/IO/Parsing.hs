@@ -16,10 +16,6 @@ import Zeiterfassung.Data
 import qualified Zeiterfassung.Zeit as Zeit
 
 
-constPath :: FilePath
-constPath = "/Schnitt/Uni/MA/malog.txt"
-
-
 parseWords :: [String] -> (Maybe DateTime, Maybe DateTime)
 parseWords [firstDateString, _, secondDateString] =
   let 
