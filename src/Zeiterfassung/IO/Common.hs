@@ -1,4 +1,4 @@
-module Zeiterfassungsdaten.IO.Common (constPath) where
+module Zeiterfassung.IO.Common (constPath) where
     
 
 constPath :: FilePath

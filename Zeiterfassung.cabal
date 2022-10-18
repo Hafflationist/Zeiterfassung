@@ -33,6 +33,7 @@ library
       UI.StateEvolver
       Zeiterfassung.Aggregations
       Zeiterfassung.Data
+      Zeiterfassung.IO.Common
       Zeiterfassung.IO.Parsing
       Zeiterfassung.IO.Saving
       Zeiterfassung.Zeit
