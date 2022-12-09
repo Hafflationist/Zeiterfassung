@@ -6,11 +6,7 @@ module Zeiterfassung.IO.Parsing
   , RawData
   ) where
 
-import Data.Attoparsec.Text
-import Data.Attoparsec.Time
 import Data.DateTime
-import qualified Data.Either.Extra as EitherExtra
-import qualified Data.Text as Txt
 import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
 import Zeiterfassung.IO.Common
@@ -19,10 +15,10 @@ import qualified Zeiterfassung.Zeit as Zeit
 
 parseWords :: [String] -> (Maybe DateTime, Maybe DateTime)
 parseWords [firstDateString, _, secondDateString] =
-  let 
-    firstDate = parseOnly utcTime  (Txt.pack (firstDateString ++ ":00Z"))
-    secondDate = parseOnly utcTime  (Txt.pack (secondDateString ++ ":00Z"))
-  in (EitherExtra.eitherToMaybe firstDate, EitherExtra.eitherToMaybe secondDate)
+  let
+    firstDate = stringToDateTime firstDateString
+    secondDate = stringToDateTime secondDateString
+  in (firstDate, secondDate)
 parseWords _ = (Nothing, Nothing)
 
 

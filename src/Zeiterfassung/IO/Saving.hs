@@ -3,29 +3,19 @@
 module Zeiterfassung.IO.Saving
   ( writeZed ) where
 
-import qualified Data.List as List
 import Data.DateTime
+import qualified Data.List as List
+import qualified Data.Maybe as Maybe
 import Zeiterfassung.Data
 import qualified Zeiterfassung.IO.Common as Common
-
-
-dateTimeToString :: Maybe DateTime -> String 
-dateTimeToString Nothing = "nothing"
-dateTimeToString (Just dtm) =
-  let
-    repl ' ' = 'T'
-    repl x = x  
-  in fmap repl 
-   . Prelude.take 16 
-   . show 
-   $ dtm
 
 
 spanToString :: Maybe DateTime -> Maybe DateTime -> String
 spanToString von bis =
   let
-    vonStr = dateTimeToString von
-    bisStr = dateTimeToString bis
+    maybeDtmToStr = Maybe.maybe "nothing" dateTimeToString
+    vonStr = maybeDtmToStr von
+    bisStr = maybeDtmToStr bis
   in vonStr ++ " - " ++ bisStr
 
 
