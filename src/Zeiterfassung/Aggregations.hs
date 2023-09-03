@@ -1,10 +1,9 @@
 module Zeiterfassung.Aggregations
   (diffMachine, sumAllHours, weeklyHours, averageHoursPerWeek) where
 
-import Data.DateTime (DateTime)
 import qualified Data.List as List ( map, sum, groupBy, filter )
 import qualified Data.Maybe as Maybe
-import Data.Time (UTCTime(utctDay))
+import Data.Time (UTCTime())
 import qualified Data.Time.Clock as Clock
 import Data.Time.LocalTime
 import qualified Data.Time.LocalTime as LocalTime
@@ -14,9 +13,16 @@ import Zeiterfassung.Data
 
 
 
-diff :: DateTime -> Maybe DateTime -> Maybe DateTime -> DateTimeDiff
-diff _ (Just from) (Just to) = DTD . Clock.diffUTCTime to $ from
-diff now (Just from) Nothing = DTD . Clock.diffUTCTime now $ from
+diff :: UTCTime -> Maybe LocalTime -> Maybe LocalTime -> DateTimeDiff 
+diff _ (Just from) (Just to) = 
+    let
+      utcFrom = LocalTime.localTimeToUTC LocalTime.utc from
+      utcTo = LocalTime.localTimeToUTC LocalTime.utc to
+    in DTD . Clock.diffUTCTime utcTo $ utcFrom 
+diff now (Just from) Nothing =
+    let
+      utcFrom = LocalTime.localTimeToUTC LocalTime.utc from
+    in DTD . Clock.diffUTCTime now $ utcFrom
 diff now _ _ = DTD . Clock.diffUTCTime now $ now
 
 
@@ -34,11 +40,11 @@ sumAllHours :: RawDataWithDiff -> Double
 sumAllHours rdwd = (List.sum . List.map (\(_,_, DTD d) -> fromInteger . round $ d) $ rdwd) / 3600.0
 
 
-getWeek :: Maybe DateTime -> Int
+getWeek :: Maybe LocalTime -> Int
 getWeek Nothing = -2
 getWeek (Just dt) =
   let
-    (_, weekOfYear, _) = toWeekDate . utctDay $ dt
+    (_, weekOfYear, _) = toWeekDate . localDay $ dt
   in weekOfYear
 
 

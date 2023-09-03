@@ -6,27 +6,27 @@ module Zeiterfassung.IO.Parsing
   , RawData
   ) where
 
-import Data.DateTime
+import Data.Time.LocalTime
 import qualified Zeiterfassung.Aggregations as Aggregations
 import Zeiterfassung.Data
 import Zeiterfassung.IO.Common
 import qualified Zeiterfassung.Zeit as Zeit
 
 
-parseWords :: [String] -> (Maybe DateTime, Maybe DateTime)
+parseWords :: [String] -> (Maybe LocalTime, Maybe LocalTime)
 parseWords [firstDateString, _, secondDateString] =
   let
-    firstDate = stringToDateTime firstDateString
-    secondDate = stringToDateTime secondDateString
+    firstDate = stringToLocalTime firstDateString
+    secondDate = stringToLocalTime secondDateString
   in (firstDate, secondDate)
 parseWords _ = (Nothing, Nothing)
 
 
-parseLine :: String -> (Maybe DateTime, Maybe DateTime)
+parseLine :: String -> (Maybe LocalTime, Maybe LocalTime)
 parseLine = parseWords . words
 
 
-parseFile :: FilePath -> IO [(Maybe DateTime, Maybe DateTime)]
+parseFile :: FilePath -> IO [(Maybe LocalTime, Maybe LocalTime)]
 parseFile path = do
   contentLines <- reverse . lines <$> readFile path
   return $ parseLine <$> contentLines
@@ -44,3 +44,4 @@ initZed = do
     , hoursPerIntervall = []
     , hasActiveLog = False
     }
+

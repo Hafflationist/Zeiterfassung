@@ -3,14 +3,14 @@
 module Zeiterfassung.IO.Saving
   ( writeZed ) where
 
-import Data.DateTime
 import qualified Data.List as List
 import qualified Data.Maybe as Maybe
+import Data.Time.LocalTime
 import Zeiterfassung.Data
 import qualified Zeiterfassung.IO.Common as Common
 
 
-spanToString :: Maybe DateTime -> Maybe DateTime -> String
+spanToString :: Maybe LocalTime -> Maybe LocalTime -> String
 spanToString von bis =
   let
     maybeDtmToStr = Maybe.maybe "nothing" dateTimeToString
@@ -19,7 +19,7 @@ spanToString von bis =
   in vonStr ++ " - " ++ bisStr
 
 
-rawDataToString :: [(Maybe DateTime, Maybe DateTime)] -> String
+rawDataToString :: [(Maybe LocalTime, Maybe LocalTime)] -> String
 rawDataToString rd = List.intercalate "\n" . reverse $ fmap (uncurry spanToString) rd
 
 

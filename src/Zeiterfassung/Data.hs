@@ -5,12 +5,12 @@ module Zeiterfassung.Data
   , IntervallData
   , DateTimeDiff(..)
   , dateTimeToString
-  , stringToDateTime
+  , stringToLocalTime
   ) where
 
 import Data.Attoparsec.Text
 import Data.Attoparsec.Time
-import Data.DateTime ( DateTime )
+-- import Data.DateTime ( DateTime )
 import qualified Data.Either.Extra as EitherExtra
 import qualified Data.Text as Txt
 import Data.Time
@@ -23,9 +23,9 @@ data Zeiterfassungsdaten = Zeiterfassungsdaten
   , hasActiveLog      :: Bool
   } deriving (Show, Eq)
 
-type RawData = [(Maybe DateTime, Maybe DateTime)]
+type RawData = [(Maybe LocalTime, Maybe LocalTime)]
 
-type RawDataWithDiff = [(Maybe DateTime, Maybe DateTime, DateTimeDiff)]
+type RawDataWithDiff = [(Maybe LocalTime, Maybe LocalTime, DateTimeDiff)]
 
 type IntervallData = [(String, Int)]
 
@@ -44,7 +44,7 @@ instance Num DateTimeDiff where
   (-) (DTD ndt1) (DTD ndt2) = DTD (ndt1 - ndt2)
 
 
-dateTimeToString :: DateTime -> String 
+dateTimeToString :: LocalTime -> String 
 dateTimeToString dtm =
   let
     repl ' ' = 'T'
@@ -54,13 +54,13 @@ dateTimeToString dtm =
    . show
    $ dtm
 
-stringToDateTime :: String -> Maybe DateTime
-stringToDateTime str =
+stringToLocalTime :: String -> Maybe LocalTime
+stringToLocalTime str =
   let
     repl ' ' = 'T'
     repl x = x
   in EitherExtra.eitherToMaybe
-    . parseOnly utcTime
+    . parseOnly localTime
     . Txt.pack
     . fmap repl
     $ (str ++ ":00Z")

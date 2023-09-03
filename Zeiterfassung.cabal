@@ -48,12 +48,14 @@ library
     , base >=4.7 && <5
     , brick
     , containers
-    , datetime
     , extra
     , filepath
     , iso8601-time
     , lens
     , linear
+    , microlens
+    , microlens-mtl
+    , microlens-th
     , random
     , text
     , text-zipper
@@ -76,12 +78,14 @@ executable Zeiterfassung-exe
     , base >=4.7 && <5
     , brick
     , containers
-    , datetime
     , extra
     , filepath
     , iso8601-time
     , lens
     , linear
+    , microlens
+    , microlens-mtl
+    , microlens-th
     , random
     , text
     , text-zipper
@@ -105,12 +109,14 @@ test-suite Zeiterfassung-test
     , base >=4.7 && <5
     , brick
     , containers
-    , datetime
     , extra
     , filepath
     , iso8601-time
     , lens
     , linear
+    , microlens
+    , microlens-mtl
+    , microlens-th
     , random
     , text
     , time

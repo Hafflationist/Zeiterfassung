@@ -3,11 +3,10 @@
 module UI.Draw (drawUI, myAttrMap) where
 
 import Brick
-  ( App(..), AttrMap, BrickEvent(..), EventM, Next, Widget
-  , customMain, neverShowCursor
-  , continue, halt
+  (  AttrMap,  Widget
   , str
-  , attrMap, withAttr, emptyWidget, AttrName, on
+  , attrMap, withAttr, AttrName, on
+  , attrName
   , (<+>), (<=>)
   , padTopBottom, padLeftRight
   )
@@ -16,8 +15,9 @@ import qualified Brick.Widgets.Center as Center
 import qualified Brick.Widgets.Core as Core
 import qualified Brick.Widgets.Edit as Edit
 import qualified Brick.Widgets.List as L
-import Data.DateTime
+import Data.Maybe
 import Data.Text
+import Data.Time.LocalTime
 import qualified Data.Sequence as Seq
 
 import UI.State
@@ -44,13 +44,13 @@ drawUI z =
 drawTimes :: ZeiterfassungsdatenTUI -> Widget Name
 drawTimes z =
   let
-    genericList = rawDataGenericList z
+    genericList = _rawDataGenericList z
     widgetList :: Widget Name
     widgetList = L.renderList drawSingleTimePair True genericList
   in widgetList
 
 
-drawSingleTimePair :: Bool -> (Maybe DateTime, Maybe DateTime, DateTimeDiff) -> Widget Name
+drawSingleTimePair :: Bool -> (Maybe LocalTime, Maybe LocalTime, DateTimeDiff) -> Widget Name
 drawSingleTimePair isSelected (von, bis, diff) =
   let
     prepareString Nothing = "       ??       "
@@ -66,9 +66,9 @@ drawAggregatedDetails :: ZeiterfassungsdatenTUI -> Widget Name
 drawAggregatedDetails z =
   let
     pad = padTopBottom 1 . padLeftRight 4
-    workedHours = str . Prelude.take 6 . show . Aggregations.sumAllHours . rawDataWithDiff . zed $ z
-    workedHoursPerWeek = str . Prelude.take 4 . show . Aggregations.averageHoursPerWeek . rawDataWithDiff . zed $ z
-    dataFields = ((str . show . Prelude.length . rawData . zed $ z) <=> workedHours <=> workedHoursPerWeek)
+    workedHours = str . Prelude.take 6 . show . Aggregations.sumAllHours . rawDataWithDiff . _zed $ z
+    workedHoursPerWeek = str . Prelude.take 4 . show . Aggregations.averageHoursPerWeek . rawDataWithDiff . _zed $ z
+    dataFields = ((str . show . Prelude.length . rawData . _zed $ z) <=> workedHours <=> workedHoursPerWeek)
     texts = str "Anzahl an Datensätzen:" <=> str "Gesamtzahl der Stunden:" <=> str "Stunden pro Woche:"
   in pad texts <+> pad dataFields
 
@@ -76,7 +76,7 @@ drawAggregatedDetails z =
 drawWochenzeiten :: ZeiterfassungsdatenTUI -> Widget Name
 drawWochenzeiten z =
   let
-    hoursPerWeek = Seq.fromList . Aggregations.weeklyHours . rawDataWithDiff . zed $ z
+    hoursPerWeek = Seq.fromList . Aggregations.weeklyHours . rawDataWithDiff . _zed $ z
     genericList = L.list 2 hoursPerWeek 1
     widgetList :: Widget Name
     widgetList = L.renderList drawSingleWeek True genericList
@@ -103,10 +103,10 @@ drawSingleDateTime editor isFocus =
 drawDatensatz :: ZeiterfassungsdatenTUI -> Widget Name
 drawDatensatz z =
   let
-    editorWidgetVon = drawSingleDateTime (editorVon z) (focus z == FocusVon)
-    textVon = if focus z == FocusVon then " [Von:]" else "  Von: "
-    editorWidgetBis = drawSingleDateTime (editorBis z) (focus z == FocusBis)
-    textBis = if focus z == FocusBis then " [Bis:]" else "  Bis: "
+    editorWidgetVon = drawSingleDateTime (_editorVon z) (_focus z == FocusVon)
+    textVon = if _focus z == FocusVon then " [Von:]" else "  Von: "
+    editorWidgetBis = drawSingleDateTime (_editorBis z) (_focus z == FocusBis)
+    textBis = if _focus z == FocusBis then " [Bis:]" else "  Bis: "
  in (str textVon <+> editorWidgetVon) <=> (str textBis <+> editorWidgetBis)
 
 
@@ -117,9 +117,9 @@ drawHelp = str "V=Fokus auf von; B=Fokus auf bis; Esc=Fokus auf Liste; R=Neulade
 drawSystem :: ZeiterfassungsdatenTUI -> Widget Name
 drawSystem z =
   let
-    lastFetchStr = Prelude.take 19 . show . lastFetch $ z
-    vonFocusStr = "vonFocus: " ++ (if focus z == FocusVon then "1" else "0")
-    bisFocusStr = "bisFocus: " ++ (if focus z == FocusBis then "1" else "0")
+    lastFetchStr = Prelude.take 19 . show . _lastFetch $ z
+    vonFocusStr = "vonFocus: " ++ (if _focus z == FocusVon then "1" else "0")
+    bisFocusStr = "bisFocus: " ++ (if _focus z == FocusBis then "1" else "0")
   in str ("Letzte Aktualisierung: " ++ lastFetchStr ++ " | " ++ vonFocusStr ++ " | " ++ bisFocusStr)
 
 
@@ -129,4 +129,4 @@ myAttrMap = attrMap V.defAttr
   ]
 
 selectedDatePairAttr :: AttrName
-selectedDatePairAttr = "selectedDatePairAttr"
+selectedDatePairAttr = attrName "selectedDatePairAttr"

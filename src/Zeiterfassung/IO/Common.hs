@@ -2,4 +2,4 @@ module Zeiterfassung.IO.Common (constPath) where
     
 
 constPath :: FilePath
-constPath = "/Schnitt/Uni/MA/malog.txt"
+constPath = "/mnt/schnitt/Uni/MA/malog.txt"
