@@ -150,6 +150,13 @@ tuifyZed now z foc =
   }
 
 
+handlePreHook :: EventM Name ZeiterfassungsdatenTUI ()
+handlePreHook = do
+  zTui <- get
+  let z = reloadEditors zTui
+  put z
+
+
 handle :: V.Event -> EventM Name ZeiterfassungsdatenTUI ()
 handle e = do
   z <- get
@@ -157,7 +164,7 @@ handle e = do
   handleWithFocus focusOfZ e
 
 handleWithFocus :: Focus -> V.Event -> EventM Name ZeiterfassungsdatenTUI ()
-handleWithFocus FocusListe e = zoom rawDataGenericList $ L.handleListEvent e
+handleWithFocus FocusListe e = zoom rawDataGenericList $ L.handleListEventVi L.handleListEvent e
 handleWithFocus FocusVon e = zoom editorVon . Edit.handleEditorEvent . VtyEvent $ e
 handleWithFocus FocusBis e = zoom editorBis . Edit.handleEditorEvent . VtyEvent $ e
 
@@ -172,6 +179,9 @@ handleEvent (VtyEvent (V.EvKey (V.KChar 'v') []))  = setFocus FocusVon
 handleEvent (VtyEvent (V.EvKey (V.KChar 'b') []))  = setFocus FocusBis
 handleEvent (VtyEvent (V.EvKey V.KEsc []))         = setFocus FocusListe
 handleEvent (VtyEvent (V.EvKey (V.KChar 'q') []))  = halt
+-- vi motions:
+handleEvent (VtyEvent e@(V.EvKey (V.KChar 'j') []))  = handlePreHook >> handle e
+handleEvent (VtyEvent e@(V.EvKey (V.KChar 'k') []))  = handlePreHook >> handle e
 handleEvent (VtyEvent e)                           = handle e
 --  | otherwise                                       = 
 handleEvent _                                      = return ()
